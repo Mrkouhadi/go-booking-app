@@ -18,7 +18,7 @@ func AddDefaultData(tmplData *models.TemplateData) *models.TemplateData {
 // render tamplates
 var app *config.AppConfig
 
-// newTemplates sets the config for thetemplate package
+// newTemplates sets the config for the template package
 func NewTemplates(a *config.AppConfig) {
 	app = a
 }
