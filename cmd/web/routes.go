@@ -21,5 +21,9 @@ func Routes(app *config.AppConfig) http.Handler {
 	mux.Get("/features", handlers.Repo.Features)
 	mux.Get("/about", handlers.Repo.About)
 
+	// render files in the template(html)
+	fileServer := http.FileServer(http.Dir("./static/"))
+	mux.Handle("/static/*", http.StripPrefix("/static", fileServer))
+
 	return mux
 }
