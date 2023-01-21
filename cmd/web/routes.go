@@ -20,7 +20,8 @@ func Routes(app *config.AppConfig) http.Handler {
 	mux.Get("/", handlers.Repo.Home)
 	mux.Get("/features", handlers.Repo.Features)
 	mux.Get("/about", handlers.Repo.About)
-	mux.Get("/contact", handlers.Repo.Contact)
+	mux.Get("/contact", handlers.Repo.Contact) //
+	mux.Get("/make-reservation", handlers.Repo.MakeReservation)
 
 	// render files in the template(html)
 	fileServer := http.FileServer(http.Dir("./static/"))
