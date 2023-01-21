@@ -52,3 +52,7 @@ func (m *Repository) Features(w http.ResponseWriter, req *http.Request) {
 func (m *Repository) Contact(w http.ResponseWriter, req *http.Request) {
 	render.RenderTemplate(w, "contact.page.tmpl", &models.TemplateData{})
 }
+
+func (m *Repository) MakeReservation(w http.ResponseWriter, req *http.Request) {
+	render.RenderTemplate(w, "make-reservation.page.tmpl", &models.TemplateData{})
+}
