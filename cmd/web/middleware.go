@@ -6,6 +6,7 @@ import (
 	"github.com/justinas/nosurf"
 )
 
+// csrf
 func Nosurf(next http.Handler) http.Handler {
 	csrfHandler := nosurf.New(next)
 
