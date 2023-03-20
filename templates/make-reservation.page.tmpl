@@ -35,19 +35,12 @@
 
 
 <script>
-    
+
+// Constants
     const startdate = document.querySelector("#startingdate")
     const enddate = document.querySelector("#endingdate")
 
-    document.querySelector("#reservation-form").addEventListener("submit",function(){
-        console.log(startdate.value, enddate.value)
-    })
-
-
-   document.querySelector("#btn").addEventListener("click",function(){
-        NotifyModal("Error!", "do you want to continue", "success", "confirm")
-    })
-
+// NotifyModal function
     const NotifyModal=(title, text,icon,confirmButtonText)=>{
         Swal.fire({
             title,
@@ -56,6 +49,64 @@
             confirmButtonText,
         })
     }
+
+// Prompt function 
+    const Prompt=()=>{
+        let toast = function(c){
+            const { position = "top-end", msg="", icon="success"} = c; 
+            const Toast = Swal.mixin({
+                toast:true,
+                title:msg,
+                position,
+                icon,
+                showConfirmButton:false,
+                timer:3000,
+                timerProgressBar:true,
+                didOpen:(toast)=>{
+                    toast.addEventListener("mouseendter", Swal.stopTimer)
+                    toast.addEventListener("mouseleave", Swal.resumeTimer)
+                }
+            })
+            Toast.fire({
+                icon:"success",
+                title:"a title coming from toast.fire"
+            })
+        }
+        let success = function(c){
+            const {msg="",title="",footer=""} = c;
+                Swal.fire({
+                    icon: 'success',
+                    title: title,
+                    text: msg,
+                    footer,
+                 })
+        }
+        let error = function(c){
+            const {msg="",title="",footer=""} = c;
+                Swal.fire({
+                    icon: 'error',
+                    title: title,
+                    text: msg,
+                    footer,
+                 })
+        }
+            return {
+                toast,
+                success,
+                error
+            }
+    }
+    const attention = Prompt()
+
+// Event listeners
+    document.querySelector("#reservation-form").addEventListener("submit",function(){
+        console.log(startdate.value, enddate.value)
+    })
+   document.querySelector("#btn").addEventListener("click",function(){
+       //attention.toast({msg:"hello toasting message", icon:"error"})
+       //attention.success({msg:"hello toasting message"})
+        attention.error({msg:"hello toasting message"})
+    })
 
 </script>
 
