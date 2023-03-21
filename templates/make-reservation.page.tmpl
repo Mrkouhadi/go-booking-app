@@ -90,10 +90,41 @@
                     footer,
                  })
         }
+        let custom=async(c)=>{
+            const { msg="" , title="" } = c;
+            const { value: formValues } = await Swal.fire({
+                    title,
+                    html:msg,
+                    backdrop:false,
+                    focusConfirm: false,
+                    showCancelButton:true,
+                   /* willOpen:()=>{
+                        const elem = document.getElementById("reservation-dates-modal")
+                        const rp = new DateRangePicker(elem,{
+                            format:"yyyy-mm-dd",
+                            showOnFocus:true
+                        })
+                    },*/
+                    preConfirm: () => {
+                        return [
+                        document.getElementById('start').value,
+                        document.getElementById('end').value
+                        ]
+                    },
+                    didOpen:()=>{
+                        document.getElementById("start").removeAttribute("disabled")
+                        document.getElementById("end").removeAttribute("disabled")
+                    }
+            })
+            if (formValues) {
+                Swal.fire(JSON.stringify(formValues))
+            }
+        }
             return {
                 toast,
                 success,
-                error
+                error,
+                custom
             }
     }
     const attention = Prompt()
@@ -105,7 +136,26 @@
    document.querySelector("#btn").addEventListener("click",function(){
        //attention.toast({msg:"hello toasting message", icon:"error"})
        //attention.success({msg:"hello toasting message"})
-        attention.error({msg:"hello toasting message"})
+       //attention.error({msg:"hello toasting message"})
+
+        // for custom function
+        const formHtml = `
+            <form id="check-availability" action="" method="post" novalidate class="needs-validation" >
+                <div class="row">
+                    <div class="col">
+                        <div class="row" id="reservation-dates-modal">
+                            <div class="col">
+                                <input type="date" name="start" class="form-control" id="start" placeholder="Arrival" disabled required/>
+                            </div>
+                            <div class="col">
+                                <input type="date" name="end" class="form-control" id="end" placeholder="Departure" disabled required/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        `
+        attention.custom({msg:formHtml, title:"Select Your Dates"})
     })
 
 </script>
