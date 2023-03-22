@@ -24,6 +24,7 @@ func Routes(app *config.AppConfig) http.Handler {
 	mux.Get("/make-reservation", handlers.Repo.MakeReservation)
 	mux.Get("/general-rooms", handlers.Repo.GeneralRooms)
 	mux.Get("/major-suite", handlers.Repo.MajorSuite)
+	mux.Get("/search-availability", handlers.Repo.SearchAvailability)
 
 	// render files in the template(html)
 	fileServer := http.FileServer(http.Dir("./static/"))
