@@ -8,15 +8,9 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
 
-        <title>Web app in Golang</title>
-
-        {{block "css" .}}
-
-        {{end}}
-
+        <title> Booking Web app in Golang </title>
     </head>
     <body>
-
         <!-- Header section -->
             <nav class="navbar navbar-expand-lg bg-dark-subtle">
                 <div class="container-fluid">
@@ -30,7 +24,7 @@
                                 <a class="nav-link active" aria-current="page" href="/">Home</a>
                             </li>
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <a class="nav-link dropdown-toggle" href="" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                     Rooms
                                 </a>
                                 <ul class="dropdown-menu">
@@ -45,7 +39,7 @@
                                 <a class="nav-link" href="/about">About</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="/make-reservation">Book Now</a>
+                                <a class="nav-link" href="/search-availability">Book Now</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link" href="/contact">Contact</a>
@@ -58,15 +52,164 @@
         {{block "content" .}}
 
         {{end}}
+        <div class="container">
+        <footer class="row row-cols-1 row-cols-sm-2 row-cols-md-5 py-5 my-5 border-top">
+            <div class="col mb-3">
+            <a href="/" class="d-flex align-items-center mb-3 link-dark text-decoration-none">
+                <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"></use></svg>
+            </a>
+            <p class="text-muted">© 2022</p>
+            </div>
 
-        {{block "js" .}}
+            <div class="col mb-3">
 
+            </div>
 
-        {{end}}
+            <div class="col mb-3">
+            <h5>Section</h5>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">Home</a></li>
+                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">Features</a></li>
+                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">Pricing</a></li>
+                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">FAQs</a></li>
+                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">About</a></li>
+            </ul>
+            </div>
+
+            <div class="col mb-3">
+            <h5>Section</h5>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">Home</a></li>
+                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">Features</a></li>
+                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">Pricing</a></li>
+                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">FAQs</a></li>
+                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">About</a></li>
+            </ul>
+            </div>
+
+            <div class="col mb-3">
+            <h5>Section</h5>
+            <ul class="nav flex-column">
+                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">Home</a></li>
+                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">Features</a></li>
+                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">Pricing</a></li>
+                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">FAQs</a></li>
+                <li class="nav-item mb-2"><a href="#" class="nav-link p-0 text-muted">About</a></li>
+            </ul>
+            </div>
+        </footer>
+        </div>
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    </body>
-    </html>
+    <script>
 
-{{end}}
+        // Constants
+            const startdate = document.querySelector("#start")
+            const enddate = document.querySelector("#end")
+        // validation
+/*
+            (function () {
+                'use strict';
+                Window.addEventListener('load', function () {
+                    // Fetch all the forms we want to apply custom Bootstrap validation styles to
+                    let forms = document.getElementsByClassName('needs-validation');
+                    // Loop over them and prevent submission
+                    Array.prototype.filter.call(forms, function (form) {
+                        form.addEventListener('submit', function (event) {
+                            if (form.checkValidity() === false) {
+                                event.preventDefault();
+                                event.stopPropagation();
+                            }
+                            form.classList.add('was-validated');
+                        }, false);
+                    });
+                }, false);
+            })();
+*/
+        // NotifyModal function
+            const NotifyModal=(title, text,icon,confirmButtonText)=>{
+                Swal.fire({
+                    title,
+                    text,
+                    icon,
+                    confirmButtonText,
+                })
+            }
+
+        // Prompt function 
+            const Prompt=()=>{
+                let toast = function(c){
+                    const { position = "top-end", msg="", icon="success"} = c; 
+                    const Toast = Swal.mixin({
+                        toast:true,
+                        title:msg,
+                        position,
+                        icon,
+                        showConfirmButton:false,
+                        timer:3000,
+                        timerProgressBar:true,
+                        didOpen:(toast)=>{
+                            toast.addEventListener("mouseendter", Swal.stopTimer)
+                            toast.addEventListener("mouseleave", Swal.resumeTimer)
+                        }
+                    })
+                    Toast.fire({
+                        icon:"success",
+                        title:"a title coming from toast.fire"
+                    })
+                }
+                let success = function(c){
+                    const {msg="",title="",footer=""} = c;
+                        Swal.fire({
+                            icon: 'success',
+                            title: title,
+                            text: msg,
+                            footer,
+                        })
+                }
+                let error = function(c){
+                    const {msg="",title="",footer=""} = c;
+                        Swal.fire({
+                            icon: 'error',
+                            title: title,
+                            text: msg,
+                            footer,
+                        })
+                }
+                let custom=async(c)=>{
+                    const { msg="" , title="" } = c;
+                    const { value: formValues } = await Swal.fire({
+                            title,
+                            html:msg,
+                            backdrop:false,
+                            focusConfirm: false,
+                            showCancelButton:true,
+                            preConfirm: () => {
+                                return [
+                                document.getElementById('start').value,
+                                document.getElementById('end').value
+                                ]
+                            },
+                            didOpen:()=>{
+                                document.getElementById("start").removeAttribute("disabled")
+                                document.getElementById("end").removeAttribute("disabled")
+                            }
+                    })
+                    if (formValues) {
+                        Swal.fire(JSON.stringify(formValues))
+                    }
+                }
+                    return {
+                        toast,
+                        success,
+                        error,
+                        custom
+                    }
+            }
+            const attention = Prompt()
+    </script>
+
+    {{end}}
+</body>
+</html>

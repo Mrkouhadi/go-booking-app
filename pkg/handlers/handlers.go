@@ -61,6 +61,11 @@ func (m *Repository) MakeReservation(w http.ResponseWriter, r *http.Request) {
 	render.RenderTemplate(w, "make-reservation.page.tmpl", &models.TemplateData{})
 }
 
+// make a search-availability page
+func (m *Repository) SearchAvailability(w http.ResponseWriter, r *http.Request) {
+	render.RenderTemplate(w, "search-availability.page.tmpl", &models.TemplateData{})
+}
+
 // general rooms page handler
 func (m *Repository) GeneralRooms(w http.ResponseWriter, r *http.Request) {
 	render.RenderTemplate(w, "generals.page.tmpl", &models.TemplateData{})
