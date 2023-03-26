@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/mrkouhadi/go-booking-app/internal/config"
+	"github.com/mrkouhadi/go-booking-app/internal/forms"
 	"github.com/mrkouhadi/go-booking-app/internal/models"
 	"github.com/mrkouhadi/go-booking-app/internal/render"
 )
@@ -60,8 +61,45 @@ func (m *Repository) Contact(w http.ResponseWriter, r *http.Request) {
 }
 
 // /////// make a reservation page
+// GET
 func (m *Repository) MakeReservation(w http.ResponseWriter, r *http.Request) {
-	render.RenderTemplate(w, r, "make-reservation.page.tmpl", &models.TemplateData{})
+	var emptyReservation models.Reservation
+	data := make(map[string]interface{})
+	data["reservation"] = emptyReservation
+	render.RenderTemplate(w, r, "make-reservation.page.tmpl", &models.TemplateData{
+		Form: forms.New(nil), // include an empty,
+		Data: data,
+	})
+}
+
+// POST
+func (m *Repository) PostMakeReservation(w http.ResponseWriter, r *http.Request) {
+	// it is recommende to do this part
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	reservation := models.Reservation{
+		FirstName: r.Form.Get("first_name"),
+		LastName:  r.Form.Get("last_name"),
+		Email:     r.Form.Get("email"),
+		Phone:     r.Form.Get("phone"),
+	}
+	form := forms.New(r.PostForm)
+
+	form.Required("first_name", "last_name", "email", "phone")
+	form.MinLength("first_name", 3, r)
+
+	if !form.Valid() {
+		data := make(map[string]interface{})
+		data["reservation"] = reservation
+		render.RenderTemplate(w, r, "make-reservation.page.tmpl", &models.TemplateData{
+			Form: form,
+			Data: data,
+		})
+		return
+	}
 }
 
 // /////// make a search-availability page
@@ -92,7 +130,9 @@ func (m *Repository) AvailabilityJSON(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-	log.Println(r.Body)
+
+	// log.Println(r.Body)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(out)
 }
