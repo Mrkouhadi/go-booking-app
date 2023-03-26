@@ -8,8 +8,8 @@ import (
 	"text/template"
 
 	"github.com/justinas/nosurf"
-	"github.com/mrkouhadi/go-booking-app/pkg/config"
-	"github.com/mrkouhadi/go-booking-app/pkg/models"
+	"github.com/mrkouhadi/go-booking-app/internal/config"
+	"github.com/mrkouhadi/go-booking-app/internal/models"
 )
 
 func AddDefaultData(tmplData *models.TemplateData, r *http.Request) *models.TemplateData {

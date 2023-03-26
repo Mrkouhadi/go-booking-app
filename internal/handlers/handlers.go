@@ -6,9 +6,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/mrkouhadi/go-booking-app/pkg/config"
-	"github.com/mrkouhadi/go-booking-app/pkg/models"
-	"github.com/mrkouhadi/go-booking-app/pkg/render"
+	"github.com/mrkouhadi/go-booking-app/internal/config"
+	"github.com/mrkouhadi/go-booking-app/internal/models"
+	"github.com/mrkouhadi/go-booking-app/internal/render"
 )
 
 // the repository used by the handlers
@@ -92,7 +92,7 @@ func (m *Repository) AvailabilityJSON(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err)
 	}
-
+	log.Println(r.Body)
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(out)
 }
