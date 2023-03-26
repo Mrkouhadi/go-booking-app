@@ -6,7 +6,7 @@ import (
 	"github.com/justinas/nosurf"
 )
 
-// csrf
+// csrf : ignore any POST request that doesn't have CSRF token
 func Nosurf(next http.Handler) http.Handler {
 	csrfHandler := nosurf.New(next)
 
