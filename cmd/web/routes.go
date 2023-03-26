@@ -5,8 +5,8 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/mrkouhadi/go-booking-app/pkg/config"
-	"github.com/mrkouhadi/go-booking-app/pkg/handlers"
+	"github.com/mrkouhadi/go-booking-app/internal/config"
+	"github.com/mrkouhadi/go-booking-app/internal/handlers"
 )
 
 func Routes(app *config.AppConfig) http.Handler {
@@ -30,7 +30,7 @@ func Routes(app *config.AppConfig) http.Handler {
 
 	// POST methods
 	mux.Post("/search-availability", handlers.Repo.PostSearchAvailability)
-	mux.Get("/search-availability-json", handlers.Repo.AvailabilityJSON)
+	mux.Post("/search-availability-json", handlers.Repo.AvailabilityJSON)
 
 	// render files in the template(html)
 	fileServer := http.FileServer(http.Dir("./static/"))
