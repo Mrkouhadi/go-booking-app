@@ -7,10 +7,9 @@
         <div class="row">
             <div class="col">
                 <img src="/static/images/major-suite.jpeg"
-                     class="img-fluid img-thumbnail mx-auto d-block room-image" alt="room image"/>
+                     class="img-fluid img-thumbnail mx-auto d-block room-image" alt="room image">
             </div>
         </div>
-
 
         <div class="row">
             <div class="col">
@@ -47,6 +46,7 @@
 
     </div>
 {{end}}
+
 {{define "js"}}
     <script>
         document.getElementById("check-availability-button").addEventListener("click", function () {
@@ -56,11 +56,12 @@
                 <div class="col">
                     <div class="form-row" id="reservation-dates-modal">
                         <div class="col">
-                            <input disabled required class="form-control" type="date" name="start" id="start" placeholder="Arrival">
+                            <input disabled required class="form-control" type="text" name="start" id="start" placeholder="Arrival">
                         </div>
                         <div class="col">
-                            <input disabled required class="form-control" type="date" name="end" id="end" placeholder="Departure">
+                            <input disabled required class="form-control" type="text" name="end" id="end" placeholder="Departure">
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -72,4 +73,4 @@
             });
         })
     </script>
-    {{end}}
+{{end}}

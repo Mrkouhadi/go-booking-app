@@ -7,11 +7,13 @@ import (
 	"path/filepath"
 	"text/template"
 
+	"github.com/justinas/nosurf"
 	"github.com/mrkouhadi/go-booking-app/pkg/config"
 	"github.com/mrkouhadi/go-booking-app/pkg/models"
 )
 
-func AddDefaultData(tmplData *models.TemplateData) *models.TemplateData {
+func AddDefaultData(tmplData *models.TemplateData, r *http.Request) *models.TemplateData {
+	tmplData.CSRFToken = nosurf.Token(r)
 	return tmplData
 }
 
@@ -24,7 +26,7 @@ func NewTemplates(a *config.AppConfig) {
 }
 
 // RenderTemplate renders the requested template
-func RenderTemplate(w http.ResponseWriter, tmpl string, tmplData *models.TemplateData) {
+func RenderTemplate(w http.ResponseWriter, r *http.Request, tmpl string, tmplData *models.TemplateData) {
 	// Get the template cache from the AppConfig
 	var tmplCache map[string]*template.Template
 	if app.UseCache {
@@ -39,7 +41,7 @@ func RenderTemplate(w http.ResponseWriter, tmpl string, tmplData *models.Templat
 		log.Fatal("Could not get the template from Cached templates ! ")
 	}
 	buf := new(bytes.Buffer)
-	tmplData = AddDefaultData(tmplData)
+	tmplData = AddDefaultData(tmplData, r)
 	_ = t.Execute(buf, tmplData)
 
 	// render template

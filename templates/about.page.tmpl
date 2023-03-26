@@ -1,25 +1,12 @@
 {{template "base" .}}
 
 {{define "content"}}
-
     <div class="container">
         <div class="row">
             <div class="col">
-                <h1>This is ABOUT Page !</h1>
+                <h1>This is the about page</h1>
 
-                <br/>
-                <hr/>
-                <h3> {{index .StringMap "test"}}</h3>
-                <hr/>
-                <p>
-                {{if ne (index .StringMap "remote_ip") ""}}
-                    Your remote IP address is : {{index .StringMap "remote_ip"}}
-                {{else}}
-                    I failed to get your  remote IP address <a href="/">Go back Home </a>
-                {{end}}
-                </p>
             </div>
         </div>
     </div>
-
 {{end}}
