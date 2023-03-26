@@ -3,12 +3,15 @@
 {{define "content"}}
 
     <div class="container">
+
+
         <div class="row">
             <div class="col">
                 <img src="/static/images/generals.jpeg"
-                     class="img-fluid img-thumbnail mx-auto d-block room-image" alt="room image"/>
+                     class="img-fluid img-thumbnail mx-auto d-block room-image" alt="room image">
             </div>
         </div>
+
 
         <div class="row">
             <div class="col">
@@ -40,9 +43,14 @@
             </div>
         </div>
 
+
+
+
     </div>
 
 {{end}}
+
+
 {{define "js"}}
 <script>
     document.getElementById("check-availability-button").addEventListener("click", function () {
@@ -52,19 +60,26 @@
                 <div class="col">
                     <div class="form-row" id="reservation-dates-modal">
                         <div class="col">
-                            <input disabled required class="form-control" type="date" name="start" id="start" placeholder="Arrival">
+                            <input disabled required class="form-control" type="text" name="start" id="start" placeholder="Arrival">
                         </div>
                         <div class="col">
-                            <input disabled required class="form-control" type="date" name="end" id="end" placeholder="Departure">
+                            <input disabled required class="form-control" type="text" name="end" id="end" placeholder="Departure">
                         </div>
+
                     </div>
                 </div>
             </div>
         </form>
-    `;
+        `;
         attention.custom({
             title: 'Choose your dates',
             msg: html,
+            callback: (res)=>{
+                console.log("I have been called", res)
+                fetch("/search-availability-json")
+                    .then(d => d.json())
+                    .then(data => console.log(data))
+            }
         });
     })
 </script>
