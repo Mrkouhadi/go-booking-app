@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/gob"
 	"fmt"
 	"log"
 	"net/http"
@@ -9,6 +10,7 @@ import (
 	"github.com/alexedwards/scs/v2"
 	"github.com/mrkouhadi/go-booking-app/internal/config"
 	"github.com/mrkouhadi/go-booking-app/internal/handlers"
+	"github.com/mrkouhadi/go-booking-app/internal/models"
 	"github.com/mrkouhadi/go-booking-app/internal/render"
 )
 
@@ -18,6 +20,21 @@ var app config.AppConfig
 var session *scs.SessionManager
 
 func main() {
+	run()
+	srv := &http.Server{
+		Addr:    portNumber,
+		Handler: Routes(&app),
+	}
+	fmt.Println("Listening to Port:8080")
+	err := srv.ListenAndServe()
+
+	log.Fatal(err)
+}
+
+func run() error {
+	// what am I going to store in the session
+	gob.Register(models.Reservation{})
+
 	app.InProduction = false
 
 	session = scs.New()
@@ -39,13 +56,5 @@ func main() {
 	repo := handlers.NewRepo(&app)
 	handlers.NewHandlers(repo)
 	render.NewTemplates(&app)
-
-	srv := &http.Server{
-		Addr:    portNumber,
-		Handler: Routes(&app),
-	}
-	fmt.Println("Listening to Port:8080")
-	err = srv.ListenAndServe()
-
-	log.Fatal(err)
+	return nil
 }

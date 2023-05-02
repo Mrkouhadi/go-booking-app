@@ -27,15 +27,6 @@ func New(data url.Values) *Form {
 	}
 }
 
-// Has checks if a form's field has a value(not empty)
-func (f *Form) Has(field string, r *http.Request) bool {
-	x := r.Form.Get(field)
-	if x == "" {
-		return false
-	}
-	return true
-}
-
 // required checks for required fields
 func (f *Form) Required(fields ...string) {
 	for _, field := range fields {
@@ -47,9 +38,9 @@ func (f *Form) Required(fields ...string) {
 }
 
 // minLength checks the minimum length of the field's inserted value
-func (f *Form) MinLength(field string, minLength int, r *http.Request) bool {
-	x := r.Form.Get(field)
-	if len(x) < minLength {
+func (f *Form) MinLength(field string, minLength int) bool {
+	x := f.Get(field)
+	if len(strings.TrimSpace(x)) < minLength {
 		f.Errors.Add(field, fmt.Sprintf("This field must be at least %d Characters long", minLength))
 		return false
 	}
@@ -61,4 +52,10 @@ func (f *Form) IsEmail(field string) {
 	if !govalidator.IsEmail(f.Get(field)) {
 		f.Errors.Add(field, "Invalid Email Address !")
 	}
+}
+
+// Has checks if form field is in post and not empty
+func (f *Form) Has(field string, r *http.Request) bool {
+	x := f.Get(field)
+	return x != ""
 }
