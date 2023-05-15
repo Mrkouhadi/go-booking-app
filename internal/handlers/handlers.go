@@ -6,10 +6,13 @@ import (
 	"net/http"
 
 	"github.com/mrkouhadi/go-booking-app/internal/config"
+	"github.com/mrkouhadi/go-booking-app/internal/driver"
 	"github.com/mrkouhadi/go-booking-app/internal/forms"
 	"github.com/mrkouhadi/go-booking-app/internal/helpers"
 	"github.com/mrkouhadi/go-booking-app/internal/models"
 	"github.com/mrkouhadi/go-booking-app/internal/render"
+	"github.com/mrkouhadi/go-booking-app/internal/repository"
+	"github.com/mrkouhadi/go-booking-app/internal/repository/dbrepo"
 )
 
 // the repository used by the handlers
@@ -18,12 +21,14 @@ var Repo *Repository
 // repository type
 type Repository struct {
 	App *config.AppConfig
+	DB  repository.DatabaseRepo
 }
 
 // NewRepo creates the new repository
-func NewRepo(a *config.AppConfig) *Repository {
+func NewRepo(a *config.AppConfig, db *driver.DB) *Repository {
 	return &Repository{
 		App: a,
+		DB:  dbrepo.NewPostgresRepo(db.SQL, a),
 	}
 }
 
@@ -50,6 +55,7 @@ func (m *Repository) Features(w http.ResponseWriter, r *http.Request) {
 
 // /////// contact page
 func (m *Repository) Contact(w http.ResponseWriter, r *http.Request) {
+	m.DB.AllUsers()
 	render.RenderTemplate(w, r, "contact.page.tmpl", &models.TemplateData{})
 }
 
