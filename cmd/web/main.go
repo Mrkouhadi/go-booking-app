@@ -23,7 +23,7 @@ var app config.AppConfig
 var session *scs.SessionManager
 var infoLog *log.Logger
 var errorLog *log.Logger
-
+ 
 func main() {
 	db, err := run()
 	if err != nil {
@@ -43,7 +43,9 @@ func main() {
 func run() (*driver.DB, error) {
 	// what am I going to store in the session
 	gob.Register(models.Reservation{})
-
+	gob.Register(models.User{})
+	gob.Register(models.Room{})
+	gob.Register(models.Restriction{})
 	app.InProduction = false
 
 	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime) // \t means tab (bunch of spaces)
@@ -60,7 +62,7 @@ func run() (*driver.DB, error) {
 	app.Session = session
 	// connect to the database
 	log.Println("CNNECTING TO A DATABASE...")
-	db, err := driver.ConnectSQL("host=localhost port=5432 dbname=test_db user=kouhadi password=")
+	db, err := driver.ConnectSQL("host=localhost port=5432 dbname=bookings user=kouhadi password=")
 	if err != nil {
 		log.Fatal("Cannot connect to the database ! Dying...")
 	}
@@ -78,7 +80,7 @@ func run() (*driver.DB, error) {
 
 	repo := handlers.NewRepo(&app, db)
 	handlers.NewHandlers(repo)
-	render.NewTemplates(&app)
+	render.NewRenderer(&app)
 	helpers.Newhelpers(&app)
 	return db, nil
 }
