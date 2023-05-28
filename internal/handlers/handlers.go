@@ -106,9 +106,9 @@ func (m *Repository) PostMakeReservation(w http.ResponseWriter, r *http.Request)
 		LastName:  r.Form.Get("last_name"),
 		Email:     r.Form.Get("email"),
 		Phone:     r.Form.Get("phone"),
+		RoomId:    roomId,
 		StartDate: startDate,
 		EndDate:   endDate,
-		RoomId:    roomId,
 	}
 	form := forms.New(r.PostForm)
 
