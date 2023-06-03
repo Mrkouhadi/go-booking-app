@@ -2,7 +2,6 @@ package dbrepo
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -10,7 +9,6 @@ import (
 )
 
 func (m *postgresDBRepo) AllUsers() bool {
-	fmt.Println("CONTACT has been hit")
 	return true
 }
 
@@ -60,4 +58,27 @@ func (m *postgresDBRepo) InsertRoomRestriction(res models.RoomRestrictions) erro
 	}
 
 	return nil
+}
+
+// SearchAvailabilityByDates returns true if availability exists for roomId, and false if it no availability
+func (m *postgresDBRepo) SearchAvailabilityByDates(start, end time.Time, roomId int) (bool, error) {
+	// if the this operation could not succeed within 3 seconds end it immediately
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	var numRows int
+	// give me the number of rows from rooom_restrictions where my start_date is less than your end_date
+	// and my end date is greater than your start date
+	query := ` 
+   		select count(id) from room_restrictions where room_id = $1 and $2 < end_date and $3 > start_date;
+   `
+	row := m.DB.QueryRowContext(ctx, query, roomId, start, end)
+	err := row.Scan(&numRows)
+	if err != nil {
+		return false, err
+	}
+	// if the number is 0 then there is availability, otherwise there is no availability
+	if numRows == 0 {
+		return true, nil
+	}
+	return false, nil
 }
