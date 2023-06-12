@@ -4,10 +4,21 @@
     <div class="container">
         <div class="row">
             <div class="col">
-                <h1 class="mt-3">Make Reservation</h1>
                 {{$res := index .Data "reservation"}}
+                <h1 class="mt-3">Make Reservation</h1>                
+                <p>
+                    <strong>Reservation Details</strong> <br>
+                    Room Name: {{$res.Room.RoomName}} <br>
+                    Arrival: {{index .StringMap "start_date"}} <br>
+                    Departure: {{index .StringMap "end_date"}} <br>
+
+                </p>
                 <form method="post" action="/make-reservation" class="" novalidate> <!--needs-validation-->
                     <input type="hidden" name="csrf_token" value="{{.CSRFToken}}"/> 
+                    <input type="hidden" name="start_date" value="{{index .StringMap "start_date"}}"/>
+                    <input type="hidden" name="end_date" value="{{index .StringMap "end_date"}}"/>
+                    <input type="hidden" name="room_id" value="{{$res.RoomId}}"/>
+
                     <div class="form-group mt-3">
                         <label for="first_name">First Name:</label>
                         {{with .Form.Errors.Get "first_name"}}
@@ -46,24 +57,8 @@
                         <input class="form-control {{with .Form.Errors.Get "phone"}} is-invalid{{end}}" id="phone"
                                autocomplete="off" type='phone'
                                name='phone' value="{{$res.Phone}}" required >
-                    </div>
-                    <hr>
-
-                    <div class="form-group">
-                        <label>Start Date:</label>
-                        <input type="text" name="start_date"/>
-                    </div>
-                    <div class="form-group">
-                        <label>End Date:</label>
-                        <input type="text" name="end_date"/>
-                    </div>
-
-                    
-                    <hr>
-                    <input type="hidden" name="room_id" value="1"/>
-                    
+                    </div>                    
                     <input type="submit" class="btn btn-primary" value="Make Reservation">
-
                 </form>
 
 
