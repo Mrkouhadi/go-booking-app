@@ -7,9 +7,11 @@
                 <h1>AVAILABLE ROOMS FOR YOUR CHOSEN DATE:  </h1>
                 {{$rooms := index .Data "rooms"}}
 
-                {{range $rooms}}
-                    {{.RoomName}} <br/>
-                {{end}}
+                <ul>
+                    {{range $rooms}}
+                       <li><a href="/choose-room/{{.ID}}">{{.RoomName}}</a></li> 
+                    {{end}}
+                </ul>
             </div>
         </div>
     </div>
