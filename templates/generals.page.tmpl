@@ -97,9 +97,20 @@
                 }).then(d => d.json())
                   .then(data => {
                         if (data.ok){
-                            console.log("Room is available.")
+                            attention.custom({
+                            icon:'success',
+                            showConfirmButton:false,
+                            msg:  '<p>This Room is available for your dates</p>'
+                                + '<p> <a href="/book-room?id='+data.room_id
+                                + '&s='+data.start_date
+                                + '&e='+data.end_date
+                                + '" class="btn btn-primary">'
+                                + 'Book Now </a></p>'
+                            })
                         }else{
-                            console.log("Room is NOT available.")
+                            attention.error({
+                            msg: "This room is unavailable for your dates",
+                            })
                         }
                     })
             }
