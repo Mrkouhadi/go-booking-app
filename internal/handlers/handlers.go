@@ -206,10 +206,22 @@ type jsonResponse struct {
 }
 
 func (m *Repository) AvailabilityJSON(w http.ResponseWriter, r *http.Request) {
+
+	sd := r.Form.Get("start")
+	ed := r.Form.Get("end")
+	// convert it from a string to a time.Time format
+	layout := "2006-01-02"
+	startDate, _ := time.Parse(layout, sd)
+	endDate, _ := time.Parse(layout, ed)
+	roomId, _ := strconv.Atoi(r.Form.Get("room_id"))
+	// get available room
+	available, _ := m.DB.SearchAvailabilityByDatesByRoomID(startDate, endDate, roomId)
+
 	res := jsonResponse{
-		OK:      true,
-		MESSAGE: "There is an available room!",
+		OK:      available,
+		MESSAGE: "", // not gonna use this field anyway
 	}
+
 	out, err := json.MarshalIndent(res, "", "		")
 	if err != nil {
 		helpers.ServerError(w, err)
@@ -231,7 +243,7 @@ func (m *Repository) MajorSuite(w http.ResponseWriter, r *http.Request) {
 	render.Template(w, r, "majors.page.tmpl", &models.TemplateData{})
 }
 
-// ////////
+// //////// ReservationSummary shows the summary of the newly made reservation.
 func (m *Repository) ReservationSummary(w http.ResponseWriter, r *http.Request) {
 	reservation, ok := m.App.Session.Get(r.Context(), "reservation").(models.Reservation)
 	if !ok {

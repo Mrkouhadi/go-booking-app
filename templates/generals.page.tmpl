@@ -79,6 +79,7 @@
                     const rp = new DateRangePicker(elem, {
                         format: 'yyyy-mm-dd',
                         showOnFocus: true,
+                        minDate: new Date(),
                     })
             },
             didOpen: () => {
@@ -89,12 +90,29 @@
                 const form = document.getElementById("check-availability-form")
                 const formDT = new FormData(form)
                 formDT.append("csrf_token", "{{.CSRFToken}}")// CSRFToken coming from templateData
-
+                formDT.append("room_id", "1")
                 fetch("/search-availability-json", {
                     method:"POST",
                     body:formDT,
                 }).then(d => d.json())
-                  .then(data => console.log(data))
+                  .then(data => {
+                        if (data.ok){
+                            attention.custom({
+                            icon:'success',
+                            showConfirmButton:false,
+                            msg:  '<p>This Room is available for your dates</p>'
+                                + '<p> <a href="/book-room?id='+data.room_id
+                                + '&s='+data.start_date
+                                + '&e='+data.end_date
+                                + '" class="btn btn-primary">'
+                                + 'Book Now </a></p>'
+                            })
+                        }else{
+                            attention.error({
+                            msg: "This room is unavailable for your dates",
+                            })
+                        }
+                    })
             }
         });
     })
