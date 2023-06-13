@@ -12,6 +12,7 @@ func (m *postgresDBRepo) AllUsers() bool {
 	return true
 }
 
+// InsertReservation inserts a Reservation into the database
 func (m *postgresDBRepo) InsertReservation(res models.Reservation) (int, error) {
 	// if the this operation could not succeed within 3 seconds end it immediately
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
