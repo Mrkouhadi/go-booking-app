@@ -1,19 +1,21 @@
 {{template "base" .}}
 
 {{define "content"}}
+
     <div class="container">
 
 
         <div class="row">
             <div class="col">
-                <img src="/static/images/major-suite.jpeg"
+                <img src="/static/images/generals.jpeg"
                      class="img-fluid img-thumbnail mx-auto d-block room-image" alt="room image">
             </div>
         </div>
 
+
         <div class="row">
             <div class="col">
-                <h1 class="text-center mt-4">Major's Suite</h1>
+                <h1 class="text-center mt-4">General's Quarters</h1>
                 <p>
                     Your home away form home, set on the majestic waters of the Atlantic Ocean, this will be a vacation
                     to remember.
@@ -45,32 +47,75 @@
 
 
     </div>
+
 {{end}}
 
-{{define "js"}}
-    <script>
-        document.getElementById("check-availability-button").addEventListener("click", function () {
-            let html = `
-        <form id="check-availability-form" action="" method="post" novalidate class="needs-validation">
-            <div class="form-row">
-                <div class="col">
-                    <div class="form-row" id="reservation-dates-modal">
-                        <div class="col">
-                            <input disabled required class="form-control" type="text" name="start" id="start" placeholder="Arrival">
-                        </div>
-                        <div class="col">
-                            <input disabled required class="form-control" type="text" name="end" id="end" placeholder="Departure">
-                        </div>
 
+{{define "js"}}
+
+<script>
+    document.getElementById("check-availability-button").addEventListener("click", function () {
+            let html = `
+                <form id="check-availability-form" action="" method="post" novalidate class="needs-validation">
+                    <div class="form-row">
+                        <div class="col">
+                            <div class="form-row" id="reservation-dates-modal">
+                                <div class="col">
+                                    <input disabled required class="form-control" type="text" name="start" id="start" placeholder="Arrival">
+                                </div>
+                                <div class="col">
+                                    <input disabled required class="form-control" type="text" name="end" id="end" placeholder="Departure">
+                                </div>
+        
+                            </div>
+                        </div>
                     </div>
-                </div>
-            </div>
-        </form>
-        `;
-            attention.custom({
-                title: 'Choose your dates',
-                msg: html,
-            });
-        })
-    </script>
+                </form>
+                `;
+                attention.custom({
+                    title: 'Choose your dates',
+                    msg: html,
+                    willOpen: () => {
+                            const elem = document.getElementById("reservation-dates-modal");
+                            const rp = new DateRangePicker(elem, {
+                                format: 'yyyy-mm-dd',
+                                showOnFocus: true,
+                                minDate: new Date(),
+                            })
+                    },
+                    didOpen: () => {
+                            document.getElementById("start").removeAttribute("disabled");
+                            document.getElementById("end").removeAttribute("disabled");
+                    },
+                    callback: (res)=>{
+                        const form = document.getElementById("check-availability-form")
+                        const formDT = new FormData(form)
+                        formDT.append("csrf_token", "{{.CSRFToken}}")// CSRFToken coming from templateData
+                        formDT.append("room_id", "2")
+                        fetch("/search-availability-json", {
+                            method:"POST",
+                            body:formDT,
+                        }).then(d => d.json())
+                          .then(data => {
+                                if (data.ok){
+                                    attention.custom({
+                                    icon:'success',
+                                    showConfirmButton:false,
+                                    msg:  '<p>This Room is available for your dates</p>'
+                                        + '<p> <a href="/book-room?id='+data.room_id
+                                        + '&s='+data.start_date
+                                        + '&e='+data.end_date
+                                        + '" class="btn btn-primary">'
+                                        + 'Book Now </a></p>'
+                                    })
+                                }else{
+                                    attention.error({
+                                    msg: "This room is unavailable for your dates",
+                                    })
+                                }
+                            })
+                    }
+                });
+            })
+</script>
 {{end}}
