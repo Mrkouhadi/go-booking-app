@@ -201,8 +201,11 @@ func (m *Repository) PostSearchAvailability(w http.ResponseWriter, r *http.Reque
 
 // send data JSON back
 type jsonResponse struct {
-	OK      bool   `json:"ok"`
-	MESSAGE string `json:"message"`
+	OK         bool   `json:"ok"`
+	MESSAGE    string `json:"message"`
+	RoomId     string `json:"room_id"`
+	Start_date string `json:"start_date"`
+	End_date   string `json:"end_date"`
 }
 
 func (m *Repository) AvailabilityJSON(w http.ResponseWriter, r *http.Request) {
@@ -218,8 +221,11 @@ func (m *Repository) AvailabilityJSON(w http.ResponseWriter, r *http.Request) {
 	available, _ := m.DB.SearchAvailabilityByDatesByRoomID(startDate, endDate, roomId)
 
 	res := jsonResponse{
-		OK:      available,
-		MESSAGE: "", // not gonna use this field anyway
+		OK:         available,
+		MESSAGE:    "", // not gonna use this field anyway
+		Start_date: sd,
+		End_date:   ed,
+		RoomId:     strconv.Itoa(roomId),
 	}
 
 	out, err := json.MarshalIndent(res, "", "		")
@@ -285,4 +291,40 @@ func (m *Repository) ChooseRoom(w http.ResponseWriter, r *http.Request) {
 	res.RoomId = roomId
 	m.App.Session.Put(r.Context(), "reservation", res)
 	http.Redirect(w, r, "/make-reservation", http.StatusSeeOther)
+}
+
+// BookRoom get url params, builds sessional variable, and take user to make res screen
+func (m *Repository) BookRoom(w http.ResponseWriter, r *http.Request) {
+	// id , s , e
+	// get room's id and convert it from a string an int
+	ID, _ := strconv.Atoi(r.URL.Query().Get("id"))
+	sd := r.URL.Query().Get("s")
+	ed := r.URL.Query().Get("e")
+
+	layout := "2006-01-02"
+	startDate, _ := time.Parse(layout, sd)
+	endDate, _ := time.Parse(layout, ed)
+
+	var res models.Reservation
+
+	room, err := m.DB.GetRoomById(ID)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	res.Room.RoomName = room.RoomName
+	res.RoomId = ID
+	res.StartDate = startDate
+	res.EndDate = endDate
+
+	m.App.Session.Put(r.Context(), "reservation", res)
+	http.Redirect(w, r, "/make-reservation", http.StatusSeeOther)
+}
+
+// ////////////////////////// This is only for TEST
+func NewTestRepo(a *config.AppConfig) *Repository {
+	return &Repository{
+		App: a,
+		DB:  dbrepo.NewTestingRepo(a),
+	}
 }

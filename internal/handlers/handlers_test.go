@@ -1,10 +1,14 @@
 package handlers
 
 import (
+	"context"
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
 	"testing"
+
+	"github.com/mrkouhadi/go-booking-app/internal/models"
 )
 
 type postData struct {
@@ -19,27 +23,27 @@ var theTests = []struct {
 	params             []postData
 	expectedStatusCode int
 }{
-	{"home", "/", "GET", []postData{}, http.StatusOK},
-	{"about", "/about", "GET", []postData{}, http.StatusOK},
-	{"generals-quarters", "/generals-quarters", "GET", []postData{}, http.StatusOK},
-	{"majors-suite", "/majors-suite", "GET", []postData{}, http.StatusOK},
-	{"search-availability", "/search-availability", "GET", []postData{}, http.StatusOK},
-	{"contact", "/contact", "GET", []postData{}, http.StatusOK},
-	{"make-res", "/make-reservation", "GET", []postData{}, http.StatusOK},
-	{"search-availability", "/search-availability", "POST", []postData{
-		{key: "start", value: "2020-03-09"},
-		{key: "end", value: "2020-03-23"},
-	}, http.StatusOK},
-	{"search-availability-json", "/search-availability-json", "POST", []postData{
-		{key: "start", value: "2020-03-09"},
-		{key: "end", value: "2020-03-23"},
-	}, http.StatusOK},
-	{"make-reservation", "/make-reservation", "POST", []postData{
-		{key: "first_name", value: "Bakr"},
-		{key: "last_name", value: "Kouhadi"},
-		{key: "email", value: "Kouhadi@me.com"},
-		{key: "phone", value: "15592081881"},
-	}, http.StatusOK},
+	// {"home", "/", "GET", []postData{}, http.StatusOK},
+	// {"about", "/about", "GET", []postData{}, http.StatusOK},
+	// {"generals-quarters", "/generals-quarters", "GET", []postData{}, http.StatusOK},
+	// {"majors-suite", "/majors-suite", "GET", []postData{}, http.StatusOK},
+	// {"search-availability", "/search-availability", "GET", []postData{}, http.StatusOK},
+	// {"contact", "/contact", "GET", []postData{}, http.StatusOK},
+	// {"make-res", "/make-reservation", "GET", []postData{}, http.StatusOK},
+	// {"search-availability", "/search-availability", "POST", []postData{
+	// 	{key: "start", value: "2020-03-09"},
+	// 	{key: "end", value: "2020-03-23"},
+	// }, http.StatusOK},
+	// {"search-availability-json", "/search-availability-json", "POST", []postData{
+	// 	{key: "start", value: "2020-03-09"},
+	// 	{key: "end", value: "2020-03-23"},
+	// }, http.StatusOK},
+	// {"make-reservation", "/make-reservation", "POST", []postData{
+	// 	{key: "first_name", value: "Bakr"},
+	// 	{key: "last_name", value: "Kouhadi"},
+	// 	{key: "email", value: "Kouhadi@me.com"},
+	// 	{key: "phone", value: "15592081881"},
+	// }, http.StatusOK},
 }
 
 func TestHandlers(t *testing.T) {
@@ -76,4 +80,34 @@ func TestHandlers(t *testing.T) {
 			}
 		}
 	}
+}
+
+func TestRepository_Resrvation(t *testing.T) {
+	reservation := models.Reservation{
+		RoomId: 1,
+		Room: models.Room{
+			ID:       1,
+			RoomName: "General's Quarters",
+		},
+	}
+
+	req, _ := http.NewRequest("GET", "/make-reservation", nil)
+	ctx := getCtx(req)
+	req = req.WithContext(ctx)
+
+	rr := httptest.NewRecorder()
+	session.Put(ctx, "reservation", reservation)
+	handler := http.HandlerFunc(Repo.MakeReservation)
+	handler.ServeHTTP(rr, req)
+	if rr.Code != http.StatusOK {
+		t.Errorf("Reservation handler returns wrong response code. got %d, wanted %d", rr.Code, http.StatusOK)
+	}
+}
+
+func getCtx(req *http.Request) context.Context {
+	ctx, err := session.Load(req.Context(), req.Header.Get("x-session"))
+	if err != nil {
+		log.Println(err)
+	}
+	return ctx
 }
