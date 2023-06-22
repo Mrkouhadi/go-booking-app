@@ -1,6 +1,7 @@
 package dbrepo
 
 import (
+	"errors"
 	"time"
 
 	"github.com/mrkouhadi/go-booking-app/internal/models"
@@ -35,8 +36,9 @@ func (m *testDBRepo) SearchAvailablityForAllRooms(start, end time.Time) ([]model
 
 // GetRoomById gets a room by id
 func (m *testDBRepo) GetRoomById(id int) (models.Room, error) {
-
 	var room models.Room
-
+	if id > 2 {
+		return room, errors.New("an error")
+	}
 	return room, nil
 }
