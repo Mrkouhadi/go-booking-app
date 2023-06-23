@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -178,6 +179,44 @@ func (m *Repository) PostMakeReservation(w http.ResponseWriter, r *http.Request)
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
+
+	//  send a notification (email) to a customer
+	room, err := m.DB.GetRoomById(reservation.RoomId)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	mailContent := fmt.Sprintf(`
+		<strong>Your reservation Confirmation</strong> <br>
+		Dear %s, <br>
+			Your Reservation for romm " %s" from %s to %s has been done succefully <br>
+		Regards  <br>
+	`, reservation.FirstName, room.RoomName, reservation.StartDate.Format("2006-01-02"), reservation.EndDate.Format("2006-01-02"))
+
+	msg := models.MailData{
+		To:      reservation.Email,
+		From:    "kouhadibakr@gmail.com",
+		Subject: "Confirming your reservation",
+		Content: mailContent,
+	}
+	m.App.MailChan <- msg
+
+	//  send a notification (email)
+	mailContent = fmt.Sprintf(`
+			<strong> A Reservation Notification</strong> <br>
+			Hi, <br>
+				A Reservation for the room " %s " from %s to %s  has been made succefully by %s %s <br>
+			Regards  <br>
+		`, room.RoomName, reservation.StartDate.Format("2006-01-02"), reservation.EndDate.Format("2006-01-02"), reservation.FirstName, reservation.LastName)
+
+	msg = models.MailData{
+		To:      "kouhadibakr@gmail.com",
+		From:    "contact@bookingapp.com",
+		Subject: "Reservation Notification",
+		Content: mailContent,
+	}
+	m.App.MailChan <- msg
+
 	// store reservation details into session
 	m.App.Session.Put(r.Context(), "reservation", reservation)
 	// redirect the user to a different url after submitting the form
@@ -185,7 +224,7 @@ func (m *Repository) PostMakeReservation(w http.ResponseWriter, r *http.Request)
 }
 
 // /////// make a search-availability page
-// GET 
+// GET
 
 func (m *Repository) SearchAvailability(w http.ResponseWriter, r *http.Request) {
 
@@ -243,17 +282,17 @@ type jsonResponse struct {
 }
 
 func (m *Repository) AvailabilityJSON(w http.ResponseWriter, r *http.Request) {
-	 err := r.ParseForm()
-	 if err != nil{
+	err := r.ParseForm()
+	if err != nil {
 		resp := jsonResponse{
-			OK: false,
+			OK:      false,
 			MESSAGE: "Internal server error",
 		}
 		out, _ := json.MarshalIndent(resp, "", "        ")
 		w.Header().Set("Content-Type", "application/json")
 		w.Write(out)
 		return
-	 }
+	}
 	sd := r.Form.Get("start")
 	ed := r.Form.Get("end")
 	// convert it from a string to a time.Time format
@@ -263,9 +302,9 @@ func (m *Repository) AvailabilityJSON(w http.ResponseWriter, r *http.Request) {
 	roomId, _ := strconv.Atoi(r.Form.Get("room_id"))
 	// get available room
 	available, err := m.DB.SearchAvailabilityByDatesByRoomID(startDate, endDate, roomId)
-	if err != nil{
+	if err != nil {
 		resp := jsonResponse{
-			OK: false,
+			OK:      false,
 			MESSAGE: "Error connecting to the database",
 		}
 		out, _ := json.MarshalIndent(resp, "", "        ")

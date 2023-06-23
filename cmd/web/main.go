@@ -23,18 +23,23 @@ var app config.AppConfig
 var session *scs.SessionManager
 var infoLog *log.Logger
 var errorLog *log.Logger
- 
+
 func main() {
 	db, err := run()
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	defer db.SQL.Close()
+	defer close(app.MailChan)
+	fmt.Println("Started mail listener ")
+	listenForMail()
+
+	fmt.Println("Listening to Port:8080")
 	srv := &http.Server{
 		Addr:    portNumber,
 		Handler: Routes(&app),
 	}
-	fmt.Println("Listening to Port:8080")
 	err = srv.ListenAndServe()
 
 	log.Fatal(err)
@@ -46,6 +51,10 @@ func run() (*driver.DB, error) {
 	gob.Register(models.User{})
 	gob.Register(models.Room{})
 	gob.Register(models.Restriction{})
+
+	mailChan := make(chan models.MailData)
+	app.MailChan = mailChan
+
 	app.InProduction = false
 
 	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime) // \t means tab (bunch of spaces)
