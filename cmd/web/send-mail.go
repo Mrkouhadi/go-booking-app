@@ -1,7 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/mrkouhadi/go-booking-app/internal/models"
@@ -34,7 +37,21 @@ func sendMsg(msg models.MailData) {
 
 	email := mail.NewMSG()
 	email.SetFrom(msg.From).AddTo(msg.To).SetSubject(msg.Subject)
-	email.SetBody(mail.TextHTML, msg.Content)
+	// we haven't specified the template do this
+	if msg.Template == "" {
+		email.SetBody(mail.TextHTML, msg.Content)
+	} else {
+		// otherwise get the specified template from disk
+		data, err := os.ReadFile(fmt.Sprintf("./email-templates/%s", msg.Template))
+		if err != nil {
+			app.ErrorLog.Println(err)
+		}
+		// since data is of type array of bytes ([]bytes) we need to convert it
+		mailTmpl := string(data)
+		//args:  string to be replace in, txt to be replaced, content, how many times
+		msgToSend := strings.Replace(mailTmpl, "[%body%]", msg.Content, 1)
+		email.SetBody(mail.TextHTML, msgToSend)
+	}
 
 	err = email.Send(client)
 	if err != nil {

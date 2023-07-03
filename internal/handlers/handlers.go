@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -194,10 +195,11 @@ func (m *Repository) PostMakeReservation(w http.ResponseWriter, r *http.Request)
 	`, reservation.FirstName, room.RoomName, reservation.StartDate.Format("2006-01-02"), reservation.EndDate.Format("2006-01-02"))
 
 	msg := models.MailData{
-		To:      reservation.Email,
-		From:    "kouhadibakr@gmail.com",
-		Subject: "Confirming your reservation",
-		Content: mailContent,
+		To:       reservation.Email,
+		From:     "kouhadibakr@gmail.com",
+		Subject:  "Confirming your reservation",
+		Content:  mailContent,
+		Template: "basic.html",
 	}
 	m.App.MailChan <- msg
 
@@ -210,10 +212,11 @@ func (m *Repository) PostMakeReservation(w http.ResponseWriter, r *http.Request)
 		`, room.RoomName, reservation.StartDate.Format("2006-01-02"), reservation.EndDate.Format("2006-01-02"), reservation.FirstName, reservation.LastName)
 
 	msg = models.MailData{
-		To:      "kouhadibakr@gmail.com",
-		From:    "contact@bookingapp.com",
-		Subject: "Reservation Notification",
-		Content: mailContent,
+		To:       "kouhadibakr@gmail.com",
+		From:     "contact@bookingapp.com",
+		Subject:  "Reservation Notification",
+		Content:  mailContent,
+		Template: "basic.html",
 	}
 	m.App.MailChan <- msg
 
@@ -409,7 +412,94 @@ func (m *Repository) BookRoom(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/make-reservation", http.StatusSeeOther)
 }
 
-// ////////////////////////// This is only for TESTing purpose
+// ////////  AUTHENTICATION (login)
+// GET
+func (m *Repository) ShowLogin(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "login.page.tmpl", &models.TemplateData{
+		Form: forms.New(nil),
+	})
+}
+
+// POST
+func (m *Repository) PostShowLogin(w http.ResponseWriter, r *http.Request) {
+	_ = m.App.Session.RenewToken(r.Context())
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err)
+	}
+
+	email := r.Form.Get("email")
+	password := r.Form.Get("password")
+
+	// check the validity of the form inputs
+	form := forms.New(r.PostForm)
+	form.Required("email", "password")
+	form.IsEmail(email)
+	form.MinLength("password", 4)
+	///************************************* here is the probelm. when this part is commented, it works fine
+	// email: admin@kouhadi.com
+	// password:pass12
+
+	// if !form.Valid() {
+	// 	render.Template(w, r, "login.page.tmpl", &models.TemplateData{
+	// 		Form: form,
+	// 	})
+	// 	return
+	// }
+	//*************************************/
+	// check the credentials
+	id, _, err := m.DB.Authenticate(email, password)
+	if err != nil {
+		log.Println(err)
+		m.App.Session.Put(r.Context(), "error", "Invalid Login Credentials !")
+		http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+		return
+	}
+	m.App.Session.Put(r.Context(), "user_id", id)
+	m.App.Session.Put(r.Context(), "flash", "Logged in successfully")
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+// ///// Logout
+func (m *Repository) Logout(w http.ResponseWriter, r *http.Request) {
+	_ = m.App.Session.Destroy(r.Context()) // destroy all data in the session
+	_ = m.App.Session.RenewToken(r.Context())
+
+	http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+}
+
+// /////////////////////////// admindashboard (PROTECTED ROUTEs)
+// Admin Dashboard
+func (m *Repository) AminDashboard(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "admin-dashboard.page.tmpl", &models.TemplateData{})
+}
+
+// new reservations
+func (m *Repository) AdminNewReservations(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "admin-new-reservations.page.tmpl", &models.TemplateData{})
+}
+
+// all reservations
+func (m *Repository) AdminAllReservations(w http.ResponseWriter, r *http.Request) {
+	reservations, err := m.DB.AllReservations()
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	data := make(map[string]interface{})
+	data["reservations"] = reservations
+
+	render.Template(w, r, "admin-all-reservations.page.tmpl", &models.TemplateData{
+		Data: data,
+	})
+}
+
+// reservations calendar
+func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Request) {
+	render.Template(w, r, "admin-reservations-calendar.page.tmpl", &models.TemplateData{})
+}
+
+// ////////////////////////// This is only for TESTing purposes
 func NewTestRepo(a *config.AppConfig) *Repository {
 	return &Repository{
 		App: a,
