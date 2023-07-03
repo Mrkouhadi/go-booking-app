@@ -50,3 +50,27 @@ func (m *testDBRepo) GetRoomById(id int) (models.Room, error) {
 	}
 	return room, nil
 }
+
+func (m *testDBRepo) GetUserByID(id int) (models.User, error) {
+
+	var u models.User
+	return u, nil
+}
+
+// UpdateUser edits user's data in the DB
+func (m *testDBRepo) UpdateUser(u models.User) error {
+
+	return nil
+}
+
+// authenticating a user
+func (m *testDBRepo) Authenticate(email, testPassword string) (int, string, error) {
+	return 1, "", nil
+}
+
+// AllReservations returns a slice of all reservations
+
+func (m *testDBRepo) AllReservations() ([]models.Reservation, error) {
+	var reservations []models.Reservation
+	return reservations, nil
+}

@@ -31,6 +31,10 @@ func AddDefaultData(tmplData *models.TemplateData, r *http.Request) *models.Temp
 	tmplData.Warning = app.Session.PopString(r.Context(), "warning")
 	tmplData.Error = app.Session.PopString(r.Context(), "error")
 	tmplData.CSRFToken = nosurf.Token(r)
+	// check the user if is authenticated
+	if app.Session.Exists(r.Context(), "user_id") {
+		tmplData.IsAuthenticated = 1 // default value is 0 BUT if user authenticated then it'll be 1
+	}
 	return tmplData
 }
 
