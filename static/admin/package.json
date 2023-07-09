@@ -21,10 +21,10 @@
     "gulp-inject": "^5.0.2",
     "gulp-inject-partials": "^1.0.3",
     "gulp-replace": "^1.0.0",
-    "gulp-sass": "^4.0.2",
+    "gulp-sass": "^5.1.0",
     "merge-stream": "^1.0.1",
     "minimatch": "^3.0.4",
-    "node-sass": "^4.12.0"
+    "node-sass": "^9.0.0"
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
