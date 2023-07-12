@@ -8,13 +8,16 @@ import (
 	"net/http"
 	"path/filepath"
 	"text/template"
+	"time"
 
 	"github.com/justinas/nosurf"
 	"github.com/mrkouhadi/go-booking-app/internal/config"
 	"github.com/mrkouhadi/go-booking-app/internal/models"
 )
 
-var functions = template.FuncMap{}
+var functions = template.FuncMap{
+	"HumanDate": HumanDate, // we just passed a function to our templates
+}
 var pathToTemplates = "./templates"
 
 var app *config.AppConfig
@@ -22,6 +25,12 @@ var app *config.AppConfig
 // newTemplates sets the config for the template package
 func NewRenderer(a *config.AppConfig) {
 	app = a
+}
+
+// format dates to YYYY-MMM-DD
+func HumanDate(t time.Time) string {
+	layout := "2006-01-02"
+	return t.Format(layout)
 }
 
 // add default data for the first rendered pages
