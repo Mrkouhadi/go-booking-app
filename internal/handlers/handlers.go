@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -387,7 +388,7 @@ func (m *Repository) ChooseRoom(w http.ResponseWriter, r *http.Request) {
 // BookRoom get url params, builds sessional variable, and take user to make res screen
 func (m *Repository) BookRoom(w http.ResponseWriter, r *http.Request) {
 	// id , s , e
-	// get room's id and convert it from a string an int
+	// get room's id and convert it from a string to an int
 	ID, _ := strconv.Atoi(r.URL.Query().Get("id"))
 	sd := r.URL.Query().Get("s")
 	ed := r.URL.Query().Get("e")
@@ -436,7 +437,7 @@ func (m *Repository) PostShowLogin(w http.ResponseWriter, r *http.Request) {
 	form.Required("email", "password")
 	form.IsEmail(email)
 	form.MinLength("password", 4)
-	///************************************* here is the probelm. when this part is commented, it works fine
+	///************************************* Here is the probelm. when this part is commented, it works fine
 	// email: admin@kouhadi.com
 	// password:pass12
 
@@ -504,9 +505,34 @@ func (m *Repository) AdminAllReservations(w http.ResponseWriter, r *http.Request
 	})
 }
 
+// admin show a single reservation by id
+func (m *Repository) AdminShowReservation(w http.ResponseWriter, r *http.Request) {
+	// "/admin/reservations/all/5"  so id is i position 4 and src in position 3
+	exploded := strings.Split(r.RequestURI, "/")
+	ID, err := strconv.Atoi(exploded[4])
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	src := exploded[3]
+	strmap := make(map[string]string)
+	strmap["src"] = src
+	res, err := m.DB.GetReservationByID(ID)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	datamap := make(map[string]interface{})
+	datamap["reservation"] = res
+	render.Template(w, r, "admin-reservations-show.page.tmpl", &models.TemplateData{
+		StringMap: strmap,
+		Data:      datamap,
+		Form:      forms.New(nil),
+	})
+}
+	
 // reservations calendar
 func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Request) {
-
 	render.Template(w, r, "admin-reservations-calendar.page.tmpl", &models.TemplateData{})
 }
 
