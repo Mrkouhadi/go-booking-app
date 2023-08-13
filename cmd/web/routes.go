@@ -46,14 +46,18 @@ func Routes(app *config.AppConfig) http.Handler {
 
 	// protected routes
 	mux.Route("/admin", func(mux chi.Router) {
-		mux.Use(Auth)
+		// FIXME: UNCOMMENT the line below for enabling authentication
+		// mux.Use(Auth)
 
-		mux.Get("/dashboard", handlers.Repo.AminDashboard)                         // route will be : admin/dashboard
-		mux.Get("/reservations-new", handlers.Repo.AdminNewReservations)           // admin/reservations-new
-		mux.Get("/reservations-all", handlers.Repo.AdminAllReservations)           // admin/reservations-all
-		mux.Get("/reservations-calendar", handlers.Repo.AdminReservationsCalendar) // admin/reservations-calendar
-		mux.Get("/reservations/{src}/{id}", handlers.Repo.AdminShowReservation)    // admin/reservations-show
+		mux.Get("/dashboard", handlers.Repo.AminDashboard)                                // route will be : admin/dashboard
+		mux.Get("/reservations-new", handlers.Repo.AdminNewReservations)                  // admin/reservations-new
+		mux.Get("/reservations-all", handlers.Repo.AdminAllReservations)                  // admin/reservations-all
+		mux.Get("/reservations-calendar", handlers.Repo.AdminReservationsCalendar)        // admin/reservations-calendar
+		mux.Get("/reservations/{src}/{id}", handlers.Repo.AdminShowReservation)           // admin/reservations/all/2
+		mux.Get("/process-reservation/{src}/{id}", handlers.Repo.AdminProcessReservation) // admin/process-reservation/new/3
+		mux.Get("/delete-reservation/{src}/{id}", handlers.Repo.AdminDeleteReservation)   // admin/delete-reservation/new/3
 
+		mux.Post("/reservations/{src}/{id}", handlers.Repo.AdminPostShowReservation) // admin/reservations-show
 	})
 	return mux
 }

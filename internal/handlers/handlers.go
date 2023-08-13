@@ -426,7 +426,9 @@ func (m *Repository) PostShowLogin(w http.ResponseWriter, r *http.Request) {
 	_ = m.App.Session.RenewToken(r.Context())
 	err := r.ParseForm()
 	if err != nil {
-		log.Println(err)
+		m.App.Session.Put(r.Context(), "error", "not able to parse the form")
+		http.Redirect(w, r, "/admin", http.StatusTemporaryRedirect)
+		return
 	}
 
 	email := r.Form.Get("email")
@@ -530,9 +532,74 @@ func (m *Repository) AdminShowReservation(w http.ResponseWriter, r *http.Request
 		Form:      forms.New(nil),
 	})
 }
-	
+
+// admin POST a single reservation by id
+func (m *Repository) AdminPostShowReservation(w http.ResponseWriter, r *http.Request) {
+	err := r.ParseForm()
+	if err != nil {
+		// because is just the admin that's wy we didn't use the error handling of parsing form like in other handlers
+		helpers.ServerError(w, err)
+		return
+	}
+	exploded := strings.Split(r.RequestURI, "/")
+	ID, err := strconv.Atoi(exploded[4])
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	src := exploded[3]
+	strmap := make(map[string]string)
+	strmap["src"] = src
+	res, err := m.DB.GetReservationByID(ID)
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	// TODO: ERRORS CHECKING OF THE FORM HERE, AND ALSO ON THE CLIENT SIDE
+	res.FirstName = r.Form.Get("first_name")
+	res.LastName = r.Form.Get("last_name")
+	res.Email = r.Form.Get("email")
+	res.Phone = r.Form.Get("phone")
+	error := m.DB.UpdateReservation(res)
+	if error != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	m.App.Session.Put(r.Context(), "flash", "changes have been saved succesfully")
+	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
+}
+
+// AdminProcessReservation markes the reservation as processed
+func (m *Repository) AdminProcessReservation(w http.ResponseWriter, r *http.Request) {
+	ID, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	src := chi.URLParam(r, "src")
+
+	error := m.DB.UpdateProcessedForReservation(ID, 1)
+	if error != nil {
+		helpers.ServerError(w, error)
+		return
+	}
+	m.App.Session.Put(r.Context(), "flash", "Reservation has been marked as processed succesfully")
+	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
+}
+
+// AdminDeleteReservation deletes a reservation
+func (m *Repository) AdminDeleteReservation(w http.ResponseWriter, r *http.Request) {
+	ID, _ := strconv.Atoi(chi.URLParam(r, "id"))
+	src := chi.URLParam(r, "src")
+
+	error := m.DB.DeleteReservation(ID)
+	if error != nil {
+		helpers.ServerError(w, error)
+		return
+	}
+	m.App.Session.Put(r.Context(), "flash", "Reservation has been deleted succesfully")
+	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
+}
+
 // reservations calendar
 func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Request) {
+	
 	render.Template(w, r, "admin-reservations-calendar.page.tmpl", &models.TemplateData{})
 }
 
