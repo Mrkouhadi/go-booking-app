@@ -13,7 +13,7 @@
        <strong>Room: </strong> {{ $res.Room.RoomName}}  </br>
     </p>
 
-    <form method="post" action="/admin/reservations/{{$src}}/{{$res.ID}}" class="" novalidate> <!--needs-validation-->
+    <form method="post" action="/admin/reservations/{{$src}}/{{$res.ID}}" class="" validate> <!--needs-validation-->
         <input type="hidden" name="csrf_token" value="{{.CSRFToken}}"/> 
 
         <div class="form-group mt-3">
@@ -54,8 +54,59 @@
             <input class="form-control {{with .Form.Errors.Get "phone"}} is-invalid{{end}}" id="phone"
                    autocomplete="off" type='phone'
                    name='phone' value="{{$res.Phone}}" required >
-        </div>                    
-        <input type="submit" class="btn btn-primary" value="SAVE">
-        <a href="/admin/reservations-{{$src}}" class="btn btn-danger">CANCEL</a>
+        </div>     
+        <div class="btns_box">
+            <div>
+                <input type="submit" class="btn btn-primary" value="Save">
+                <a href="/admin/reservations-{{$src}}" class="btn btn-warning">Cencel</a>
+                <a href="#!" class="btn btn-success" onclick="ProcessReservation({{$res.ID}})">
+                    Mark As Processed
+                </a>
+            </div>
+            <div>
+                <a href="#!" class="btn btn-danger" onclick="DeleteReservation({{$res.ID}})">
+                    Delete
+                </a>
+            </div>
+        </div>    
     </form>
+{{end}}
+{{define "css"}}
+    <style>
+
+        .btns_box{
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:10px;
+            padding:10px;
+        }
+    </style>
+{{end}}
+{{define "js"}}
+{{$src := index .StringMap "src"}}
+    <script>
+        const ProcessReservation = (id)=>{
+            attention.custom({
+                icon:"warning",
+                msg:"Are you sure you wanna make this reservation as processed ?",
+                callback: function(result){
+                    if (result !== false){
+                        window.location.href = "/admin/process-reservation/{{$src}}/"+id
+                    }
+                },
+            })
+        }
+        const DeleteReservation = (id)=>{
+            attention.custom({
+                icon:"warning",
+                msg:"Are you sure you wanna DELETE this reservation?",
+                callback: function(result){
+                    if (result !== false){
+                        window.location.href = "/admin/delete-reservation/{{$src}}/"+id
+                    }
+                },
+            })
+        }
+    </script>
 {{end}}
