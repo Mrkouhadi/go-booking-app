@@ -5,7 +5,35 @@
 {{end}}
 
 {{define "content"}}
-    <div class="col-md-12">
-        Calendar of reservations
+    {{$now := index .Data "now"}}
+    <div class="col-md-12 calendar">
+        <div class="text-center">
+         <h3>
+             {{FormatDate $now "January"}} {{FormatDate $now "2006"}}
+         </h3>
+        </div>
+        <div class="calendar_btn-left">
+            <a href="/admin/reservations-calendar?y={{index .StringMap "last_month_year"}}&m={{index .StringMap "last_month"}}" class="btn btn-sm btn-outline-secondary">&#8592;</a>
+        </div>
+        <div class="calendar_btn-right">
+            <a href="/admin/reservations-calendar?y={{index .StringMap "next_month_year"}}&m={{index .StringMap "next_month"}}" class="btn btn-sm btn-outline-secondary">&#8594;</a>
+        </div>
     </div>
+{{end}}
+
+{{define "css"}}
+    <style>
+        .calendar{
+            position: relative;
+        }
+        .calendar_btn-left, .calendar_btn-right{
+            position: absolute; top: 35vh;
+        }
+        .calendar_btn-left{
+            left: 0;
+        }
+        .calendar_btn-right{
+            right: 0;
+        }
+    </style>
 {{end}}

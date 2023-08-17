@@ -16,7 +16,8 @@ import (
 )
 
 var functions = template.FuncMap{
-	"HumanDate": HumanDate, // we just passed a function to our templates
+	"HumanDate":  HumanDate, // we just passed a function to our templates
+	"FormatDate": FormatDate,
 }
 var pathToTemplates = "./templates"
 
@@ -31,6 +32,9 @@ func NewRenderer(a *config.AppConfig) {
 func HumanDate(t time.Time) string {
 	layout := "2006-01-02"
 	return t.Format(layout)
+}
+func FormatDate(t time.Time, f string) string {
+	return t.Format(f)
 }
 
 // add default data for the first rendered pages
