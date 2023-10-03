@@ -614,7 +614,7 @@ func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Re
 	nextMonthYear := next.Format("2006")
 
 	lastMonth := last.Format("01")
-	lastMonthYear := next.Format("2006")
+	lastMonthYear := last.Format("2006")
 
 	stringMap := make(map[string]string)
 
@@ -635,13 +635,51 @@ func (m *Repository) AdminReservationsCalendar(w http.ResponseWriter, r *http.Re
 
 	intMap := make(map[string]int)
 	intMap["days_in_month"] = lastOfMonth.Day()
+	rooms, err := m.DB.AllRooms()
+	if err != nil {
+		helpers.ServerError(w, err)
+		return
+	}
+	data["rooms"] = rooms
+	for _, x := range rooms {
+		// create maps
+		reservationsMap := make(map[string]int)
+		blockMap := make(map[string]int)
+		for d := firstOfMonth; !d.After(lastOfMonth); d = d.AddDate(0, 0, 1) {
+			reservationsMap[d.Format("2006-01-02")] = 0
+			blockMap[d.Format("2006-01-02")] = 0
+		}
+		// get all restrictions
+		restrictions, err := m.DB.GetRestrictionsFoorRoomByDate(x.ID, firstOfMonth, lastOfMonth)
+		if err != nil {
+			helpers.ServerError(w, err)
+			return
+		}
+		for _, y := range restrictions {
+			if y.ReservationId > 0 {
+				// it's a reservation
+				for d := y.StartDate; !d.After(y.EndDate); d = d.AddDate(0, 0, 1) {
+					reservationsMap[d.Format("2006-01-02")] = y.ReservationId
+				}
+			} else {
+				//  it's a block
+				blockMap[y.StartDate.Format("2006-01-02")] = y.ID
+			}
+		}
+		data[fmt.Sprintf("reservation_map_%d", x.ID)] = reservationsMap
+		data[fmt.Sprintf("block_map_%d", x.ID)] = blockMap
 
+		m.App.Session.Put(r.Context(), fmt.Sprintf("block_map_%d", x.ID), blockMap)
+	}
+	//  render temlates along with the data
 	render.Template(w, r, "admin-reservations-calendar.page.tmpl", &models.TemplateData{
 		StringMap: stringMap,
 		Data:      data,
 		IntMap:    intMap,
 	})
-
+}
+func (m *Repository) AdminPostReservationsCalendar(w http.ResponseWriter, r *http.Request) {
+	log.Println("Changes have saved successfully !")
 }
 
 // ////////////////////////// This is only for TESTing purposes
