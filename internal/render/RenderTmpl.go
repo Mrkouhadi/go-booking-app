@@ -18,6 +18,8 @@ import (
 var functions = template.FuncMap{
 	"HumanDate":  HumanDate, // we just passed a function to our templates
 	"FormatDate": FormatDate,
+	"Iterate":    Iterate,
+	"Add":        Add,
 }
 var pathToTemplates = "./templates"
 
@@ -28,11 +30,28 @@ func NewRenderer(a *config.AppConfig) {
 	app = a
 }
 
+// adding two ints and return the sum
+func Add(a, b int) int {
+	return a + b
+}
+
+// Iterate returns a slice of ints starting at 1, going to count
+func Iterate(count int) []int {
+	var i int
+	var items []int
+	for i = 0; i < count; i++ {
+		items = append(items, i)
+	}
+	return items
+}
+
 // format dates to YYYY-MMM-DD
 func HumanDate(t time.Time) string {
 	layout := "2006-01-02"
 	return t.Format(layout)
 }
+
+// format the date ex: from 10-2020 to October 2020
 func FormatDate(t time.Time, f string) string {
 	return t.Format(f)
 }
