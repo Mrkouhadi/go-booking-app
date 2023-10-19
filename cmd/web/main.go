@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/gob"
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -53,26 +54,42 @@ func run() (*driver.DB, error) {
 	gob.Register(models.Restriction{})
 	gob.Register(map[string]int{})
 
+	// reading flags
+	production := flag.Bool("production", true, "Application is in production") // default is always in production
+	cache := flag.Bool("cache", true, "Using tamplate cache")                   // default is always in production
+	dbName := flag.String("dbname", "", "The name of our database - postgressql")
+	dbHost := flag.String("dbhost", "localhost", "The host of our database - postgressql")
+	dbUsername := flag.String("dbusername", "", "The username of our database - postgressql")
+	dbPassword := flag.String("dbpassword", "", "The password of our database - postgressql")
+	dbPort := flag.String("dbport", "5432", "The port of our database - postgressql")
+	dbSSL := flag.String("dbSSL", "disable", "SSL certificate of our database - postgressql")
+	flag.Parse()
+	if *dbName == "" || *dbUsername == "" {
+		fmt.Println("Missing required flags")
+		os.Exit(1)
+	}
+	// setting up the channel of mails
 	mailChan := make(chan models.MailData)
 	app.MailChan = mailChan
-
-	app.InProduction = false
-
+	// setting up the mode
+	app.InProduction = *production
+	app.UseCache = *cache
+	// logs
 	infoLog = log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime) // \t means tab (bunch of spaces)
 	app.InfoLog = infoLog
 	errorLog = log.New(os.Stdout, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
 	app.ErrorLog = errorLog
-
+	// session management set up
 	session = scs.New()
 	session.Lifetime = 24 * time.Hour
 	session.Cookie.Persist = true
 	session.Cookie.SameSite = http.SameSiteLaxMode
 	session.Cookie.Secure = app.InProduction
-
 	app.Session = session
 	// connect to the database
 	log.Println("CNNECTING TO A DATABASE...")
-	db, err := driver.ConnectSQL("host=localhost port=5432 dbname=bookings user=kouhadi password=")
+	connString := fmt.Sprintf("host=%s port=%s dbname=%s user=%s password=%s sslmode=%s", *dbHost, *dbPort, *dbName, *dbUsername, *dbPassword, *dbSSL)
+	db, err := driver.ConnectSQL(connString)
 	if err != nil {
 		log.Fatal("Cannot connect to the database ! Dying...")
 	}
@@ -85,8 +102,6 @@ func run() (*driver.DB, error) {
 		return nil, err
 	}
 	app.TemplateCache = tc
-
-	app.UseCache = false
 
 	repo := handlers.NewRepo(&app, db)
 	handlers.NewHandlers(repo)

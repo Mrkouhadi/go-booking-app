@@ -3,3 +3,5 @@ database.yml
 run.sh
 bookings
 coverage.out
+go-booking-app
+note.txt

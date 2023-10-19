@@ -189,11 +189,6 @@ func (m *Repository) PostMakeReservation(w http.ResponseWriter, r *http.Request)
 	}
 
 	//  send a notification (email) to a customer
-	room, err := m.DB.GetRoomById(reservation.RoomId)
-	if err != nil {
-		helpers.ServerError(w, err)
-		return
-	}
 	mailContent := fmt.Sprintf(`
 		<strong>Your reservation Confirmation</strong> <br>
 		Dear %s, <br>
