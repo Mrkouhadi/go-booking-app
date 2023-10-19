@@ -51,7 +51,7 @@ Calendar of all reservations
                     {{range $index := Iterate $daysIM}}
                     <td class="text-center">
                         {{if gt (index $reservations (printf "%s-%s-%d" $currYear $currMonth (Add $index 1))) 0}}
-                            <a href="/admin/reservations/cal/{{index $reservations (printf "$s-$s-$d" $currYear $currMonth (Add $index 1))}}">
+                            <a href="/admin/reservations/cal/{{index $reservations (printf "$s-$s-$d" $currYear $currMonth (Add $index 1))}}/show?y={{$currYear}}&m={{$currMonth}}">
                                 <span class="text-danger">R</span>
                             </a>
                         {{else}}
@@ -60,7 +60,7 @@ Calendar of all reservations
                                     name="remove_block_{$roomID}_{{printf "%s-%s-%d" $currYear $currMonth}}"
                                     value="{{index $blocks (printf "%s-%s-%d" $currYear $currMonth (Add $index 1))}}" 
                                 {{else}}
-                                    name="add_block_{{$roomID}}_{{printf "%s-%s-%d" $currYear $currMonth (Add $index 1)}}" 
+                                   value="1" name="add_block_{{$roomID}}_{{printf "%s-%s-%d" $currYear $currMonth (Add $index 1)}}" 
                                 {{end}}
                             />
                         {{end}}
