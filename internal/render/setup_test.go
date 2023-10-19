@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"testing"
+	"text/template"
 	"time"
 
 	"github.com/alexedwards/scs/v2"
@@ -15,6 +16,12 @@ import (
 
 var session *scs.SessionManager
 var testApp config.AppConfig
+var functions = template.FuncMap{
+	"HumanDate":  render.HumanDate, // we just passed a function to our templates
+	"FormatDate": render.FormatDate,
+	"Iterate":    render.Iterate,
+	"Add":        render.Add,
+}
 
 func TestMain(m *testing.M) {
 	// what am I going to store in the session

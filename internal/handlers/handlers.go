@@ -133,7 +133,12 @@ func (m *Repository) PostMakeReservation(w http.ResponseWriter, r *http.Request)
 		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		return
 	}
-
+	room, err := m.DB.GetRoomById(roomID)
+	if err != nil {
+		m.App.Session.Put(r.Context(), "error", "invalid data!")
+		http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+		return
+	}
 	reservation := models.Reservation{
 		FirstName: r.Form.Get("first_name"),
 		LastName:  r.Form.Get("last_name"),
@@ -142,6 +147,7 @@ func (m *Repository) PostMakeReservation(w http.ResponseWriter, r *http.Request)
 		StartDate: startDate,
 		EndDate:   endDate,
 		RoomId:    roomID,
+		Room:      room,
 	}
 
 	form := forms.New(r.PostForm)
@@ -584,7 +590,7 @@ func (m *Repository) AdminPostShowReservation(w http.ResponseWriter, r *http.Req
 // AdminProcessReservation markes the reservation as processed
 func (m *Repository) AdminProcessReservation(w http.ResponseWriter, r *http.Request) {
 	ID, _ := strconv.Atoi(chi.URLParam(r, "id"))
-	src := chi.URLParam(r, "src")
+	//src := chi.URLParam(r, "src")
 
 	error := m.DB.UpdateProcessedForReservation(ID, 1)
 	if error != nil {
@@ -596,7 +602,7 @@ func (m *Repository) AdminProcessReservation(w http.ResponseWriter, r *http.Requ
 
 	m.App.Session.Put(r.Context(), "flash", "Reservation has been marked as processed succesfully")
 	if year == "" {
-		http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
+		http.Redirect(w, r, fmt.Sprintf("/admin/reservations-#{src}"), http.StatusSeeOther)
 	} else {
 		http.Redirect(w, r, fmt.Sprintf("/admin/reservations-calendar?y=%s&m=%s", year, month), http.StatusSeeOther)
 	}
@@ -605,15 +611,23 @@ func (m *Repository) AdminProcessReservation(w http.ResponseWriter, r *http.Requ
 // AdminDeleteReservation deletes a reservation
 func (m *Repository) AdminDeleteReservation(w http.ResponseWriter, r *http.Request) {
 	ID, _ := strconv.Atoi(chi.URLParam(r, "id"))
-	src := chi.URLParam(r, "src")
+	//src := chi.URLParam(r, "src")
 
 	error := m.DB.DeleteReservation(ID)
 	if error != nil {
 		helpers.ServerError(w, error)
 		return
 	}
+
+	year := r.URL.Query().Get("y")
+	month := r.URL.Query().Get("m")
+
 	m.App.Session.Put(r.Context(), "flash", "Reservation has been deleted succesfully")
-	http.Redirect(w, r, fmt.Sprintf("/admin/reservations-%s", src), http.StatusSeeOther)
+	if year == "" {
+		http.Redirect(w, r, fmt.Sprintf("/admin/reservations-#{src}"), http.StatusSeeOther)
+	} else {
+		http.Redirect(w, r, fmt.Sprintf("/admin/reservations-calendar?y=%s&m=%s", year, month), http.StatusSeeOther)
+	}
 }
 
 // reservations calendar
